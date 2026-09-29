@@ -539,7 +539,6 @@ export class SimulationEngine {
               s.outputTrays.addSpecimen(p.specimenType, this.recipeManager.selectedConductor, true);
             } else {
               s.outputTrays.transportRejectedSpecimen({ x: 1.82, y: 0.16, z: 0.08 }, 0.8);
-              s.outputTrays.addSpecimen(p.specimenType, this.recipeManager.selectedConductor, false);
             }
           }
 
