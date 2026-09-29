@@ -53,21 +53,74 @@ export class OperativeHMIController {
       #hmi-root .hmi-panel{max-height:calc(100vh - 145px);overflow:auto}
 
       @media(max-width:760px){
-        #op-info{left:8px;top:auto;bottom:154px;transform:none}
-        #op-controls{right:8px;top:auto;bottom:154px;transform:none}
+        html,body{overflow:hidden;touch-action:none}
+        #canvas-container{width:100vw;height:100dvh}
+        #hmi-topbar{
+          height:46px!important;padding:0 8px!important;
+          justify-content:flex-end!important;
+        }
+        #hmi-topbar .hmi-brand{
+          display:flex!important;position:absolute;left:8px;right:8px;
+          pointer-events:none;overflow:hidden;
+        }
+        #hmi-topbar .hmi-logo-icon{display:none}
+        #hmi-topbar .hmi-brand-main{
+          font-size:9px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+        }
+        #hmi-topbar .hmi-brand-sub{display:none!important}
+        #hmi-topbar .hmi-top-tools{display:none!important}
+        #hmi-topbar .hmi-top-right{position:relative;z-index:2;display:flex!important;gap:4px!important}
+        #hmi-topbar .btn-icon{
+          min-height:36px!important;padding:6px 8px!important;font-size:10px!important;
+        }
+
+        #op-info{left:8px;top:auto;bottom:106px;transform:none}
+        #op-controls{right:8px;top:auto;bottom:106px;transform:none}
         #op-info:hover,#op-controls:hover{transform:scale(1.04)}
+
+        #hmi-root.hmi-panel-open #hmi-workspace{
+          top:46px!important;bottom:96px!important;padding:6px!important;
+        }
         #hmi-root.hmi-panel-open #panel-left,
         #hmi-root.hmi-panel-open #panel-right{
-          position:fixed;top:58px;bottom:145px;width:min(86vw,360px);
-          max-width:none;max-height:none;z-index:11000;display:block;
+          position:fixed;top:52px;bottom:102px;width:calc(100vw - 16px);
+          max-width:420px;max-height:none;z-index:11000;display:flex!important;
+          border-radius:9px;
         }
-        #hmi-root.hmi-panel-open #panel-left{left:8px;right:auto}
-        #hmi-root.hmi-panel-open #panel-right{right:8px;left:auto}
-        #hmi-bottombar{padding:7px!important;gap:6px!important;flex-wrap:wrap!important}
+        #hmi-root.hmi-panel-open #panel-left{left:8px;right:8px}
+        #hmi-root.hmi-panel-open #panel-right{right:8px;left:8px}
+        #hmi-root.hmi-panel-open .hmi-panel.collapsed{display:none!important}
+        .hmi-panel .panel-header{height:44px!important;padding:0 10px!important}
+        .hmi-panel .panel-close-btn{width:44px!important;height:44px!important;min-width:44px!important;font-size:22px!important}
+        .hmi-panel .panel-body{padding:8px!important;gap:8px!important;-webkit-overflow-scrolling:touch}
+        .hmi-card{padding:9px!important}
+        .cfg-pills{gap:5px!important}
+        .cfg-pill{min-height:44px!important;padding:8px 7px!important}
+        .accordion-header{min-height:44px!important;padding:10px!important}
+        .param-range{height:6px!important}
+
+        #hmi-bottombar{
+          position:absolute!important;bottom:0!important;height:96px!important;
+          padding:5px 6px!important;gap:5px!important;
+          flex-direction:column!important;justify-content:center!important;
+        }
+        .bottom-mode-cluster{
+          width:100%!important;justify-content:center!important;
+          min-width:0!important;gap:2px!important;
+        }
+        .bottom-mode-cluster .mode-btn{
+          flex:1!important;min-width:0!important;
+          min-height:40px!important;padding:7px 5px!important;font-size:9px!important;
+        }
+        .bottom-cycle-controls{
+          width:100%!important;justify-content:center!important;
+          min-width:0!important;gap:4px!important;
+        }
+        .bottom-cycle-controls .btn-cycle{
+          flex:1!important;min-width:0!important;
+          min-height:40px!important;padding:7px 5px!important;font-size:9px!important;
+        }
         .bottom-telemetry-cluster{display:none!important}
-        .bottom-mode-cluster,.bottom-cycle-controls{min-width:0!important}
-        .mode-btn,.btn-cycle{min-height:44px!important;padding:9px 10px!important;font-size:10px!important}
-        .hmi-panel .panel-close-btn{width:44px!important;height:44px!important;min-width:44px!important}
       }
       @media(pointer:coarse){
         .mode-btn,.btn-cycle,.top-btn,.cfg-pill,.btn-action-primary,.param-range,
