@@ -184,27 +184,27 @@ export class FeedStraightenerSystem {
     const encHousingGeo = new THREE.CylinderGeometry(0.035, 0.035, 0.06, 24);
     encHousingGeo.rotateX(Math.PI / 2);
     const encHousing = new THREE.Mesh(encHousingGeo, this.matServoHousing);
-    encoderGroup.add(encHousing);
+    this.encoderGroup.add(encHousing);
 
     // Transparent window revealing spinning optical graduation disc
     const discGeo = new THREE.CylinderGeometry(0.028, 0.028, 0.002, 32);
     discGeo.rotateX(Math.PI / 2);
     this.encoderDisc = new THREE.Mesh(discGeo, this.matEncoderDisc);
     this.encoderDisc.position.z = -0.031;
-    encoderGroup.add(this.encoderDisc);
+    this.encoderGroup.add(this.encoderDisc);
 
     // Pulse sensing optical read head
     const headGeo = new THREE.BoxGeometry(0.015, 0.02, 0.015);
     const headMesh = new THREE.Mesh(headGeo, this.matCoupling);
     headMesh.position.set(0.022, 0.0, -0.031);
-    encoderGroup.add(headMesh);
+    this.encoderGroup.add(headMesh);
 
     // Encoder LED pulse indicator (green blinks or stays bright during motion)
     const ledGeo = new THREE.SphereGeometry(0.004, 12, 12);
     this.matEncoderLed = new THREE.MeshBasicMaterial({ color: 0x22c55e });
     this.encoderLed = new THREE.Mesh(ledGeo, this.matEncoderLed);
     this.encoderLed.position.set(0.028, 0.012, -0.031);
-    encoderGroup.add(this.encoderLed);
+    this.encoderGroup.add(this.encoderLed);
 
     encHousing.userData = {
       name: 'High-Resolution Optical Shaft Encoder',
@@ -213,7 +213,7 @@ export class FeedStraightenerSystem {
     };
     this.interactiveObjects.push(encHousing);
 
-    this.group.add(encoderGroup);
+    this.group.add(this.encoderGroup);
   }
 
   buildStraighteningUnit() {
