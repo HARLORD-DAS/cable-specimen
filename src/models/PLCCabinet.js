@@ -255,12 +255,15 @@ export class PLCCabinet {
     screen.rotation.x = -0.15;
     this.hmiArmGroup.add(screen);
 
-    consoleMesh.userData = {
+    const hmiData = {
       name: 'Industrial HMI Touchscreen Operator Console',
       category: 'HMI',
-      description: 'Capacitive touch HMI with live telemetry, recipe loader, and manual overrides.'
+      action: 'OPEN_HMI',
+      description: 'Operative capacitive touch HMI. Tap the screen to open the live operator interface; its controls command the 3D digital twin.'
     };
-    this.interactiveObjects.push(consoleMesh);
+    consoleMesh.userData = hmiData;
+    screen.userData = hmiData;
+    this.interactiveObjects.push(consoleMesh, screen);
 
     this.group.add(this.hmiArmGroup);
   }
