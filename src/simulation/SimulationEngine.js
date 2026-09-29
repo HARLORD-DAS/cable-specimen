@@ -532,13 +532,15 @@ export class SimulationEngine {
           if (isPass) this.passCount++;
           else this.rejectCount++;
 
-          // Physically add 3D specimen into the respective Front Collection Cart
+          // PASS material is accepted by its physical collection cart. A failed specimen
+          // is routed through the reject path instead of appearing instantly in the bin.
           if (s.outputTrays) {
-            s.outputTrays.addSpecimen(
-              p.specimenType,
-              this.recipeManager.selectedConductor,
-              isPass
-            );
+            if (isPass) {
+              s.outputTrays.addSpecimen(p.specimenType, this.recipeManager.selectedConductor, true);
+            } else {
+              s.outputTrays.transportRejectedSpecimen({ x: 1.82, y: 0.16, z: 0.08 }, 0.8);
+              s.outputTrays.addSpecimen(p.specimenType, this.recipeManager.selectedConductor, false);
+            }
           }
 
           this.totalCyclesCompleted++;
