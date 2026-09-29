@@ -396,6 +396,31 @@ export class OutputTraysSystem {
     this.carts.SHEET.specimens.push(sheetMesh);
   }
 
+  // Add a newly generated process-waste piece to the physical reject/scrap cart.
+  // This is separate from PASS/REJECT inspection sorting: jacket and punch waste
+  // are manufacturing waste and must physically accumulate in the scrap cart.
+  addWaste(kind = 'PROCESS_WASTE') {
+    const cart = this.carts.REJECT;
+    if (!cart) return;
+    const idx = cart.specimens.length;
+    const scrapGeo = kind === 'PUNCH_SCRAP'
+      ? new THREE.BoxGeometry(0.045, 0.006, 0.022)
+      : new THREE.CylinderGeometry(0.014, 0.014, 0.10 + Math.random() * 0.06, 12);
+    if (kind !== 'PUNCH_SCRAP') scrapGeo.rotateZ(Math.PI / 2);
+    const scrap = new THREE.Mesh(scrapGeo, this.matScrapJacket);
+    const layer = Math.floor(idx / 10);
+    scrap.position.set(
+      (Math.random() - 0.5) * 0.28,
+      0.012 + layer * 0.009,
+      (Math.random() - 0.5) * 0.18
+    );
+    scrap.rotation.set(Math.random() * 0.5, Math.random() * Math.PI, Math.random() * 0.5);
+    scrap.castShadow = true;
+    cart.specimenContainer.add(scrap);
+    cart.specimens.push(scrap);
+    cart.boxMesh.userData.specimenCount++;
+  }
+
   addScrapItem(idx) {
     const scrapGeo = new THREE.CylinderGeometry(0.014, 0.014, 0.08 + Math.random() * 0.08, 12, 1, false, 0, Math.PI * 1.4);
     scrapGeo.rotateZ(Math.PI / 2);
