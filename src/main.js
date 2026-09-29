@@ -268,8 +268,8 @@ class DigitalTwinApp {
 
           // Physical HMI is a true operator entry point. Do not treat it as
           // an ordinary component-selection event.
-          if (hit.userData.action === 'OPEN_HMI' && this.operativeHMI) {
-            this.operativeHMI.toggleHMI();
+          if (hit.userData.hmiTouchSurface && this.operativeHMI) {
+            this.operativeHMI.handlePhysicalTouch(intersects[0].uv);
             return;
           }
 
@@ -333,6 +333,7 @@ class DigitalTwinApp {
 
     // Update Master Kinematic Simulation Engine
     this.sim.update(delta);
+    this.operativeHMI?.update();
 
     // Render Scene
     this.renderer.render(this.scene, this.camera);
