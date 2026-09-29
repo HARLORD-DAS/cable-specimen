@@ -58,15 +58,16 @@ export class OperativeHMIController {
         #op-info:hover,#op-controls:hover{transform:scale(1.04)}
         #hmi-root.hmi-panel-open #panel-left,
         #hmi-root.hmi-panel-open #panel-right{
-          position:fixed;left:8px;right:8px;width:auto;max-width:none;
-          top:58px;bottom:145px;max-height:none;z-index:11000
+          position:fixed;top:58px;bottom:145px;width:min(86vw,360px);
+          max-width:none;max-height:none;z-index:11000;display:block;
         }
-        #hmi-bottombar{
-          padding:7px!important;gap:6px!important;flex-wrap:wrap!important
-        }
+        #hmi-root.hmi-panel-open #panel-left{left:8px;right:auto}
+        #hmi-root.hmi-panel-open #panel-right{right:8px;left:auto}
+        #hmi-bottombar{padding:7px!important;gap:6px!important;flex-wrap:wrap!important}
         .bottom-telemetry-cluster{display:none!important}
         .bottom-mode-cluster,.bottom-cycle-controls{min-width:0!important}
-        .mode-btn,.btn-cycle{min-height:42px!important;padding:8px 10px!important;font-size:10px!important}
+        .mode-btn,.btn-cycle{min-height:44px!important;padding:9px 10px!important;font-size:10px!important}
+        .hmi-panel .panel-close-btn{width:44px!important;height:44px!important;min-width:44px!important}
       }
       @media(pointer:coarse){
         .mode-btn,.btn-cycle,.top-btn,.cfg-pill,.btn-action-primary,.param-range,
@@ -91,28 +92,45 @@ export class OperativeHMIController {
   }
 
   openPanel(side) {
+    const root = document.getElementById('hmi-root');
     const left = document.getElementById('panel-left');
     const right = document.getElementById('panel-right');
+    if (!root) return;
 
-    // Left icon ALWAYS opens only the LEFT panel.
-    // Right icon ALWAYS opens only the RIGHT panel.
-    if (side === 'left') {
-      left?.classList.remove('collapsed');
-    } else if (side === 'right') {
-      right?.classList.remove('collapsed');
-    }
+    const panel = side === 'left' ? left : side === 'right' ? right : null;
+    const icon = side === 'left' ? document.getElementById('op-info')
+      : side === 'right' ? document.getElementById('op-controls') : null;
+    if (!panel) return;
+
+    root.classList.remove('hmi-collapsed');
+    root.classList.add('hmi-panel-open');
+    panel.style.display = '';
+    panel.classList.remove('collapsed');
+    icon?.classList.add('active');
+
+    const other = side === 'left' ? right : left;
+    const otherIcon = side === 'left' ? document.getElementById('op-controls') : document.getElementById('op-info');
+    other?.classList.add('collapsed');
+    other?.style.removeProperty('display');
+    otherIcon?.classList.remove('active');
   }
 
   closeSidePanel(side) {
-    const root=document.getElementById('hmi-root');
-    const panelId=side==='left'?'panel-left':'panel-right';
-    const iconId=side==='left'?'op-info':'op-controls';
-    document.getElementById(panelId)?.style.setProperty('display','none');
-    document.getElementById(iconId)?.classList.remove('active');
-    const other=side==='left'?'panel-right':'panel-left';
-    if(root) root.classList.remove('hmi-panel-open');
-    // Keep the other panel closed/open state untouched; its icon controls it independently.
-    if(document.getElementById(other)?.style.display==='block' && root) root.classList.add('hmi-panel-open');
+    const root = document.getElementById('hmi-root');
+    const panel = document.getElementById(side === 'left' ? 'panel-left' : 'panel-right');
+    const icon = document.getElementById(side === 'left' ? 'op-info' : 'op-controls');
+    if (!root || !panel) return;
+
+    panel.classList.add('collapsed');
+    panel.style.removeProperty('display');
+    icon?.classList.remove('active');
+
+    const other = side === 'left' ? document.getElementById('panel-right') : document.getElementById('panel-left');
+    const otherOpen = other && !other.classList.contains('collapsed');
+    if (!otherOpen) {
+      root.classList.add('hmi-collapsed');
+      root.classList.remove('hmi-panel-open');
+    }
   }
 
   updateHMIState(){
