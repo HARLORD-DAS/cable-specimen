@@ -463,13 +463,30 @@ export class OutputTraysSystem {
     const targetCart = this.carts.REJECT;
     const target = new THREE.Vector3(
       targetCart.config.xPos,
-      targetCart.config.xPos * 0 + 0.18,
-      0.08
+      0.18,
+      0.04
     );
-    this.wasteTransfers.push({ scrap, kind, start: scrap.position.clone(), target, elapsed: 0, duration: Math.max(0.4, duration) });
+
+    // Waste follows the visible chute in two physical stages rather than moving
+    // in a straight line through empty space.
+    const start = scrap.position.clone();
+    const chuteMid = new THREE.Vector3(0.55, 0.30, -0.28);
+    const path = (kind === 'REJECTED_SPECIMEN')
+      ? [start, target]
+      : [start, chuteMid, target];
+
+    this.wasteTransfers.push({
+      scrap,
+      kind,
+      start,
+      target,
+      path,
+      elapsed: 0,
+      duration: Math.max(0.4, duration)
+    });
   }
 
-  transportRejectedSpecimen(source = { x: 1.82, y: 0.16, z: 0.08 }, duration = 0.8) {
+  transportRejectedSpecimen(source = { x: 1.82, y: 0.16, z: 0.04 }, duration = 0.8) {
     this.transportWaste('REJECTED_SPECIMEN', source, duration);
   }
 
@@ -480,8 +497,22 @@ export class OutputTraysSystem {
       t.elapsed += delta;
       const p = THREE.MathUtils.clamp(t.elapsed / t.duration, 0, 1);
       const eased = p * p * (3 - 2 * p);
-      t.scrap.position.lerpVectors(t.start, t.target, eased);
-      t.scrap.position.y += Math.sin(p * Math.PI) * 0.08;
+
+      if (t.path.length === 3) {
+        // Piecewise interpolation follows the two visible chute sections.
+        if (eased < 0.5) {
+          const localP = eased * 2;
+          t.scrap.position.lerpVectors(t.path[0], t.path[1], localP);
+        } else {
+          const localP = (eased - 0.5) * 2;
+          t.scrap.position.lerpVectors(t.path[1], t.path[2], localP);
+        }
+      } else {
+        t.scrap.position.lerpVectors(t.start, t.target, eased);
+      }
+
+      // Small physical bounce while travelling down the chute.
+      t.scrap.position.y += Math.sin(p * Math.PI) * 0.025;
       t.scrap.rotation.x += delta * 4;
       if (p >= 1) {
         this.group.remove(t.scrap);
