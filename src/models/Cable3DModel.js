@@ -269,6 +269,7 @@ export class Cable3DModel {
 
     this.peelFlapTop.position.set(mainSheathLen * 0.5 - cableLength * 0.125, 0, 0);
     this.peelFlapBottom.position.set(mainSheathLen * 0.5 - cableLength * 0.125, 0, 0);
+    this.peelBaseX = this.peelFlapTop.position.x;
 
     this.sheathGroup.add(this.peelFlapTop);
     this.sheathGroup.add(this.peelFlapBottom);
@@ -365,6 +366,7 @@ export class Cable3DModel {
 
     this.peelFlapTop.position.set(sheathLen * 0.5 - cableLength * 0.13, 0, 0);
     this.peelFlapBottom.position.set(sheathLen * 0.5 - cableLength * 0.13, 0, 0);
+    this.peelBaseX = this.peelFlapTop.position.x;
 
     this.sheathGroup.add(this.peelFlapTop);
     this.sheathGroup.add(this.peelFlapBottom);
@@ -429,6 +431,10 @@ export class Cable3DModel {
       this.peelFlapBottom.rotation.z = 0;
       this.peelFlapTop.position.y = 0;
       this.peelFlapBottom.position.y = 0;
+      if (this.peelBaseX !== undefined) {
+        this.peelFlapTop.position.x = this.peelBaseX;
+        this.peelFlapBottom.position.x = this.peelBaseX;
+      }
     } else if (state === 'SCORED') {
       if (this.scoreRingMesh) this.scoreRingMesh.visible = true;
     } else if (state === 'SLIT') {
@@ -444,6 +450,9 @@ export class Cable3DModel {
 
       this.peelFlapTop.rotation.z = currentAngle;
       this.peelFlapBottom.rotation.z = -currentAngle;
+      const peelTravel = 0.10 * progress; // 100 mm equivalent physical peel-back stroke
+      this.peelFlapTop.position.x = this.peelBaseX + peelTravel;
+      this.peelFlapBottom.position.x = this.peelBaseX + peelTravel;
       this.peelFlapTop.position.y = Math.sin(currentAngle) * 0.012;
       this.peelFlapBottom.position.y = -Math.sin(currentAngle) * 0.012;
     } else if (state === 'SEPARATED') {
