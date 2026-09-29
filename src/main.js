@@ -327,7 +327,21 @@ class DigitalTwinApp {
   }
 }
 
-// Instantiate Master Application on DOM Ready
-window.addEventListener('DOMContentLoaded', () => {
-  new DigitalTwinApp();
-});
+// Instantiate Master Application
+function bootApplication() {
+  try {
+    new DigitalTwinApp();
+  } catch (err) {
+    console.error('Fatal initialization error:', err);
+    const errDiv = document.createElement('div');
+    errDiv.style.cssText = 'position:fixed;top:20px;left:20px;background:#7f1d1d;color:#fecaca;padding:16px;border-radius:8px;z-index:99999;font-family:monospace;max-width:80%;border:1px solid #ef4444;';
+    errDiv.innerHTML = `<strong>Failed to initialize 3D Digital Twin:</strong><br><pre>${err.stack || err.message}</pre>`;
+    document.body.appendChild(errDiv);
+  }
+}
+
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', bootApplication);
+} else {
+  bootApplication();
+}

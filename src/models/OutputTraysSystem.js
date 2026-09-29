@@ -272,7 +272,11 @@ export class OutputTraysSystem {
     // Colored banner box
     const hexStr = '#' + colorHex.toString(16).padStart(6, '0');
     ctx.fillStyle = hexStr;
-    ctx.roundRect(0, 0, 512, 128, 12);
+    if (ctx.roundRect) {
+      ctx.roundRect(0, 0, 512, 128, 12);
+    } else {
+      ctx.fillRect(0, 0, 512, 128);
+    }
     ctx.fill();
 
     // Subtle dark gradient vignette
