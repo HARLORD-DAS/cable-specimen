@@ -254,13 +254,14 @@ export class CableReelSystem {
 
   buildPayoutGuide() {
     // Tangential cable payout section leaving top of reel and traveling to Machine Universal Inlet
-    // From Reel top (X = 0, Y = 0.38 + 0.36 = 0.74, Z = 0) down to Inlet (X = +0.55 relative, Y = 0.50, Z = 0)
-    // In local space: starts at (0.05, 0.72, 0) and curves gently toward (+0.50, 0.50, 0)
+    // The reel group sits at X=-2.70 and the inlet datum is X=-2.00.
+    // Therefore the payout cable must finish at local X=+0.70 so its
+    // physical end reaches the inlet center without a visible gap.
     const curve = new THREE.CubicBezierCurve3(
       new THREE.Vector3(0.05, 0.72, 0.0),
       new THREE.Vector3(0.20, 0.68, 0.0),
       new THREE.Vector3(0.35, 0.52, 0.0),
-      new THREE.Vector3(0.50, 0.50, 0.0)
+      new THREE.Vector3(0.70, 0.50, 0.0)
     );
 
     const tubeGeo = new THREE.TubeGeometry(curve, 24, 0.012, 16, false);
@@ -270,7 +271,7 @@ export class CableReelSystem {
 
     // Guide roller cradle at reel exit
     const cradleGroup = new THREE.Group();
-    cradleGroup.position.set(0.40, 0.50, 0.0);
+    cradleGroup.position.set(0.60, 0.50, 0.0);
 
     const rGeo = new THREE.CylinderGeometry(0.022, 0.022, 0.08, 16);
     rGeo.rotateX(Math.PI / 2);
