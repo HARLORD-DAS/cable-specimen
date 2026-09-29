@@ -28,6 +28,7 @@ export class OutputTraysSystem {
     this.wasteTransfers = [];
 
     this.initMaterials();
+    this.buildWasteChutes();
     this.buildFourCarts();
   }
 
@@ -111,6 +112,21 @@ export class OutputTraysSystem {
       roughness: 0.55,
       metalness: 0.1
     });
+  }
+
+  buildWasteChutes() {
+    // Fixed receiving chutes: processing waste visibly travels toward the Reject/Scrap cart.
+    const chuteMat = new THREE.MeshStandardMaterial({ color: 0x555a5e, roughness: 0.42, metalness: 0.72 });
+    const makeChute = (x, y, z, length, angle = 0) => {
+      const chute = new THREE.Mesh(new THREE.BoxGeometry(length, 0.055, 0.18), chuteMat);
+      chute.position.set(x, y, z);
+      chute.rotation.z = angle;
+      chute.castShadow = true;
+      chute.receiveShadow = true;
+      this.group.add(chute);
+    };
+    makeChute(0.62, 0.16, 0.08, 1.55, -0.05);
+    makeChute(1.02, 0.11, 0.08, 0.55, -0.10);
   }
 
   buildFourCarts() {
@@ -401,8 +417,8 @@ export class OutputTraysSystem {
   // along a simple physical chute path, and is only accepted by the reject cart
   // when it reaches the cart. This prevents instant spawning inside the bin.
   transportWaste(kind = 'PROCESS_WASTE', source = { x: 0, y: 0.2, z: -0.76 }, duration = 1.0) {
-    const scrapGeo = kind === 'PUNCH_SCRAP'
-      ? new THREE.BoxGeometry(0.045, 0.006, 0.022)
+    const scrapGeo = (kind === 'PUNCH_SCRAP' || kind === 'REJECTED_SPECIMEN')
+      ? new THREE.BoxGeometry(0.07, 0.012, 0.035)
       : new THREE.CylinderGeometry(0.014, 0.014, 0.10 + Math.random() * 0.06, 12);
     if (kind !== 'PUNCH_SCRAP') scrapGeo.rotateZ(Math.PI / 2);
     const scrap = new THREE.Mesh(scrapGeo, this.matScrapJacket);
@@ -418,6 +434,10 @@ export class OutputTraysSystem {
       0.08
     );
     this.wasteTransfers.push({ scrap, kind, start: scrap.position.clone(), target, elapsed: 0, duration: Math.max(0.4, duration) });
+  }
+
+  transportRejectedSpecimen(source = { x: 1.82, y: 0.16, z: 0.08 }, duration = 0.8) {
+    this.transportWaste('REJECTED_SPECIMEN', source, duration);
   }
 
   update(delta) {
