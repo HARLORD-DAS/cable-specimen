@@ -463,8 +463,8 @@ export class OutputTraysSystem {
     const cart = this.carts.REJECT;
     if (!cart) return;
     const idx = cart.specimens.length;
-    const scrapGeo = kind === 'PUNCH_SCRAP'
-      ? new THREE.BoxGeometry(0.045, 0.006, 0.022)
+    const scrapGeo = (kind === 'PUNCH_SCRAP' || kind === 'REJECTED_SPECIMEN')
+      ? new THREE.BoxGeometry(0.07, 0.012, 0.035)
       : new THREE.CylinderGeometry(0.014, 0.014, 0.10 + Math.random() * 0.06, 12);
     if (kind !== 'PUNCH_SCRAP') scrapGeo.rotateZ(Math.PI / 2);
     const scrap = new THREE.Mesh(scrapGeo, this.matScrapJacket);
