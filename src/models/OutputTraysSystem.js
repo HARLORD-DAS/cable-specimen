@@ -25,6 +25,7 @@ export class OutputTraysSystem {
 
     this.interactiveObjects = [];
     this.carts = {};
+    this.wasteTransfers = [];
 
     this.initMaterials();
     this.buildFourCarts();
@@ -396,9 +397,48 @@ export class OutputTraysSystem {
     this.carts.SHEET.specimens.push(sheetMesh);
   }
 
-  // Add a newly generated process-waste piece to the physical reject/scrap cart.
-  // This is separate from PASS/REJECT inspection sorting: jacket and punch waste
-  // are manufacturing waste and must physically accumulate in the scrap cart.
+  // Start a visible waste transfer. The scrap is created at the source, travels
+  // along a simple physical chute path, and is only accepted by the reject cart
+  // when it reaches the cart. This prevents instant spawning inside the bin.
+  transportWaste(kind = 'PROCESS_WASTE', source = { x: 0, y: 0.2, z: -0.76 }, duration = 1.0) {
+    const scrapGeo = kind === 'PUNCH_SCRAP'
+      ? new THREE.BoxGeometry(0.045, 0.006, 0.022)
+      : new THREE.CylinderGeometry(0.014, 0.014, 0.10 + Math.random() * 0.06, 12);
+    if (kind !== 'PUNCH_SCRAP') scrapGeo.rotateZ(Math.PI / 2);
+    const scrap = new THREE.Mesh(scrapGeo, this.matScrapJacket);
+    scrap.position.set(source.x, source.y, source.z);
+    scrap.rotation.set(Math.random() * 0.5, Math.random() * Math.PI, Math.random() * 0.5);
+    scrap.castShadow = true;
+    this.group.add(scrap);
+
+    const targetCart = this.carts.REJECT;
+    const target = new THREE.Vector3(
+      targetCart.config.xPos,
+      targetCart.config.xPos * 0 + 0.18,
+      0.08
+    );
+    this.wasteTransfers.push({ scrap, kind, start: scrap.position.clone(), target, elapsed: 0, duration: Math.max(0.4, duration) });
+  }
+
+  update(delta) {
+    if (!this.wasteTransfers.length) return;
+    for (let i = this.wasteTransfers.length - 1; i >= 0; i--) {
+      const t = this.wasteTransfers[i];
+      t.elapsed += delta;
+      const p = THREE.MathUtils.clamp(t.elapsed / t.duration, 0, 1);
+      const eased = p * p * (3 - 2 * p);
+      t.scrap.position.lerpVectors(t.start, t.target, eased);
+      t.scrap.position.y += Math.sin(p * Math.PI) * 0.08;
+      t.scrap.rotation.x += delta * 4;
+      if (p >= 1) {
+        this.group.remove(t.scrap);
+        this.addWaste(t.kind);
+        this.wasteTransfers.splice(i, 1);
+      }
+    }
+  }
+
+  // Final receiving operation after the physical transfer reaches the cart.
   addWaste(kind = 'PROCESS_WASTE') {
     const cart = this.carts.REJECT;
     if (!cart) return;
@@ -409,11 +449,7 @@ export class OutputTraysSystem {
     if (kind !== 'PUNCH_SCRAP') scrapGeo.rotateZ(Math.PI / 2);
     const scrap = new THREE.Mesh(scrapGeo, this.matScrapJacket);
     const layer = Math.floor(idx / 10);
-    scrap.position.set(
-      (Math.random() - 0.5) * 0.28,
-      0.012 + layer * 0.009,
-      (Math.random() - 0.5) * 0.18
-    );
+    scrap.position.set((Math.random() - 0.5) * 0.28, 0.012 + layer * 0.009, (Math.random() - 0.5) * 0.18);
     scrap.rotation.set(Math.random() * 0.5, Math.random() * Math.PI, Math.random() * 0.5);
     scrap.castShadow = true;
     cart.specimenContainer.add(scrap);
