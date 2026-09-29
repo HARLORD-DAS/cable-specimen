@@ -264,6 +264,7 @@ export class SimulationEngine {
 
     const s = this.subsystems;
     if (!s) return;
+    if (s.outputTrays && typeof s.outputTrays.update === 'function') s.outputTrays.update(delta);
 
     const p = this.recipeManager.params;
 
@@ -423,7 +424,7 @@ export class SimulationEngine {
         // Physically collect the peeled jacket/waste in the reject-scrap cart.
         // The waste is added only after separation has completed.
         if (s.outputTrays && typeof s.outputTrays.addWaste === 'function') {
-          s.outputTrays.addWaste('PEELED_JACKET');
+          s.outputTrays.transportWaste('PEELED_JACKET', { x: -0.10, y: 0.42, z: -0.76 }, 1.1);
         }
         this.wasteCount++;
 
@@ -448,6 +449,9 @@ export class SimulationEngine {
         if (routeProgress >= 1.0) {
           if (p.specimenType === 'CONDUCTOR') {
             s.conductor.setConductorMaterial(this.recipeManager.selectedConductor);
+          } else if (p.specimenType === 'SHEET') {
+            // Sheet/wafer preparation uses the sheet specimen path rather than the dumbbell press.
+            s.dumbbell.loadBlankMaterial(0xe8e4dc);
           } else {
             const specColor = this.recipeManager.selectedCableType === 'POWER' ? 0x0284c7 : 0x27272a;
             s.dumbbell.loadBlankMaterial(specColor);
@@ -463,6 +467,9 @@ export class SimulationEngine {
 
         if (p.specimenType === 'CONDUCTOR') {
           s.conductor.setShearStroke(Math.sin(prepProgress * Math.PI));
+        } else if (p.specimenType === 'SHEET') {
+          // Sheet path: keep the polymer blank on the preparation bed and use the transfer shuttle.
+          s.dumbbell.setPunchStroke(0.0);
         } else {
           s.dumbbell.setPunchStroke(Math.sin(prepProgress * Math.PI));
           if (prepProgress > 0.5 && !s.dumbbell.isDumbbellCut) {
@@ -470,7 +477,7 @@ export class SimulationEngine {
             s.dumbbell.ejectScrapFlash();
             // Punching creates a real scrap slug which is collected in the reject cart.
             if (s.outputTrays && typeof s.outputTrays.addWaste === 'function') {
-              s.outputTrays.addWaste('PUNCH_SCRAP');
+              s.outputTrays.transportWaste('PUNCH_SCRAP', { x: 0.85, y: 0.18, z: -0.58 }, 0.9);
             }
             this.wasteCount++;
           }
