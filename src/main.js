@@ -25,6 +25,7 @@ import { Cable3DModel } from './models/Cable3DModel.js';
 import { SimulationEngine } from './simulation/SimulationEngine.js';
 import { CrossSectionModal } from './ui/CrossSectionModal.js';
 import { HMIOverlay } from './ui/HMIOverlay.js';
+import { OperativeHMIController } from './ui/OperativeHMIController.js';
 
 /**
  * Universal Automated Cable Specimen Preparation System
@@ -214,6 +215,8 @@ class DigitalTwinApp {
   initUI() {
     this.csModal = new CrossSectionModal(this.sim);
     this.hmi = new HMIOverlay(this.sim, this.camCtrl, this.csModal, this.audio);
+    // The physical 3D HMI is an operative entry point; auxiliary UI stays collapsed until requested.
+    this.operativeHMI = new OperativeHMIController(this);
   }
 
   initInteractions() {
