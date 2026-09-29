@@ -38,28 +38,8 @@ export class OperativeHMIController {
       }
       #op-info{left:14px;top:50%;transform:translateY(-50%)}
       #op-controls{right:14px;top:50%;transform:translateY(-50%)}
-      #op-hmi{right:14px;top:14px}
-      #op-hmi-panel{pointer-events:auto;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100vw - 28px));max-height:calc(100vh - 28px);overflow:auto;background:#151719;color:#e8eaec;border:1px solid #555a5e;border-radius:12px;box-shadow:0 24px 80px #000b;z-index:12500}
-      #op-hmi-panel[hidden]{display:none!important}
-      .op-hmi-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #3d4145;font-weight:800}
-      .op-hmi-close{width:34px;height:34px;border:1px solid #555a5e;border-radius:8px;background:#202427;color:#fff;font-size:20px;cursor:pointer}
-      .op-hmi-body{padding:14px;display:grid;gap:12px}
-      .op-hmi-status{display:flex;justify-content:space-between;padding:10px;background:#202427;border-radius:8px}
-      .op-hmi-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-      .op-hmi-action{min-height:48px;border:1px solid #555a5e;border-radius:8px;background:#24282b;color:#fff;font-weight:800;cursor:pointer}
-      .op-hmi-action:hover{border-color:#f2a900;color:#f2a900}
-      .op-hmi-action.start{background:#1c6841}.op-hmi-action.stop{background:#70272b}.op-hmi-action.estop{background:#8d2025}
       #op-info:hover,#op-controls:hover{transform:translateY(-50%) scale(1.04)}
 
-      #hmi-root.hmi-hmi-open #panel-hmi{display:block!important}
-      #hmi-root.hmi-hmi-open #hmi-topbar,
-      #hmi-root.hmi-hmi-open #hmi-bottombar{pointer-events:none;opacity:.35}
-      #panel-hmi{position:fixed!important;left:50%;top:50%;transform:translate(-50%,-50%);width:min(620px,calc(100vw - 32px));max-height:calc(100vh - 80px);overflow:auto;z-index:11500;box-shadow:0 24px 70px #000b}
-      .hmi-op-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-      .hmi-op-btn{min-height:46px;border:1px solid #555a5e;border-radius:8px;background:#202427;color:#e8eaec;font-weight:800;cursor:pointer}
-      .hmi-op-btn:hover{border-color:#f2a900;color:#f2a900}
-      .hmi-op-start{background:#1d6b43}.hmi-op-stop{background:#6f2528}.hmi-op-estop{background:#8f2024}
-      @media(max-width:760px){#panel-hmi{top:10px;transform:translateX(-50%);max-height:calc(100vh - 20px)}}
       #hmi-root.hmi-collapsed #panel-left,
       #hmi-root.hmi-collapsed #panel-right{display:none!important}
       #hmi-root.hmi-collapsed #hmi-top-tools{display:none}
@@ -75,8 +55,6 @@ export class OperativeHMIController {
       @media(max-width:760px){
         #op-info{left:8px;top:auto;bottom:154px;transform:none}
         #op-controls{right:8px;top:auto;bottom:154px;transform:none}
-        #op-hmi{right:8px;top:8px}
-        #op-hmi-panel{top:8px;transform:translateX(-50%);max-height:calc(100vh - 16px)}
         #op-info:hover,#op-controls:hover{transform:scale(1.04)}
         #hmi-root.hmi-panel-open #panel-left,
         #hmi-root.hmi-panel-open #panel-right{
@@ -104,27 +82,11 @@ export class OperativeHMIController {
     dock.innerHTML = `
       <button class="op-hmi-icon" id="op-info" title="Open left instructions">☰</button>
       <button class="op-hmi-icon" id="op-controls" title="Open right controls">☷</button>
-      <button class="op-hmi-icon" id="op-hmi" title="Open physical HMI operator screen">▣</button>
-      <section id="op-hmi-panel" hidden aria-label="Operative HMI">
-        <div class="op-hmi-head"><span>HMI MACHINE CONTROL</span><button class="op-hmi-close" id="op-hmi-close" title="Close HMI">×</button></div>
-        <div class="op-hmi-body">
-          <div class="op-hmi-status"><span>STATUS</span><strong id="op-hmi-state">READY</strong></div>
-          <div class="op-hmi-actions">
-            <button class="op-hmi-action start" id="op-hmi-start">START</button>
-            <button class="op-hmi-action stop" id="op-hmi-stop">STOP / PAUSE</button>
-            <button class="op-hmi-action" id="op-hmi-reset">RESET</button>
-            <button class="op-hmi-action estop" id="op-hmi-estop">E-STOP</button>
-          </div>
-          <div class="op-hmi-status"><span>MODE</span><strong id="op-hmi-mode">AUTO</strong></div>
-        </div>
-      </section>
     `;
     document.body.appendChild(dock);
 
     document.getElementById('op-info').addEventListener('click',()=>this.openPanel('left'));
     document.getElementById('op-controls').addEventListener('click',()=>this.openPanel('right'));
-    document.getElementById('op-hmi').addEventListener('click',()=>this.toggleHMI());
-
     document.getElementById('hmi-root')?.classList.add('hmi-collapsed');
   }
 
@@ -144,36 +106,6 @@ export class OperativeHMIController {
 
     document.getElementById('op-info')?.classList.toggle('active', side === 'left');
     document.getElementById('op-controls')?.classList.toggle('active', side === 'right');
-  }
-
-  openHMIOverlay() {
-    const root=document.getElementById('hmi-root');
-    if(root){ root.classList.remove('hmi-collapsed','hmi-panel-open'); root.classList.add('hmi-hmi-open'); }
-    const left=document.getElementById('panel-left');
-    const right=document.getElementById('panel-right');
-    if(left) left.style.display='none';
-    if(right) right.style.display='none';
-    const hmi=document.getElementById('panel-hmi');
-    if(hmi) hmi.style.display='none';
-    const panel=document.getElementById('op-hmi-panel');
-    if(panel) panel.hidden=false;
-    document.getElementById('op-info')?.classList.remove('active');
-    document.getElementById('op-controls')?.classList.remove('active');
-  }
-
-  closeHMI() {
-    const root=document.getElementById('hmi-root');
-    if(root) {
-      root.classList.add('hmi-collapsed');
-      root.classList.remove('hmi-hmi-open','hmi-panel-open');
-    }
-    root.classList.remove('hmi-hmi-open');
-    const hmi=document.getElementById('panel-hmi');
-    if(hmi) hmi.style.display='';
-    const panel=document.getElementById('op-hmi-panel');
-    if(panel) panel.hidden=true;
-    this.open=false;
-    document.getElementById('op-hmi')?.classList.remove('active');
   }
 
   closeSidePanel(side) {
@@ -211,27 +143,6 @@ export class OperativeHMIController {
 
     document.getElementById('op-info')?.classList.remove('active');
     document.getElementById('op-controls')?.classList.remove('active');
-  }
-
-  toggleHMI() {
-    this.open=!this.open;
-    const button=document.getElementById('op-hmi');
-    const panel=document.getElementById('op-hmi-panel');
-
-    if(this.open) {
-      this.openHMIOverlay();
-      if(panel) panel.hidden=false;
-      this.hmi.showComponentContext({
-        name:'Industrial HMI Touchscreen Operator Console',
-        category:'HMI',
-        action:'OPEN_HMI',
-        description:'Operative touchscreen control surface. AUTO, MANUAL, recipe parameters, START, STOP, RESET and E-STOP directly command the digital twin.'
-      });
-      button?.classList.add('active');
-    } else {
-      this.closeHMI();
-      button?.classList.remove('active');
-    }
   }
 
   drawPhysicalScreen() {
@@ -276,15 +187,8 @@ export class OperativeHMIController {
   }
 
   bindPhysicalHMI() {
-    const original=this.app.hmi.showComponentContext.bind(this.app.hmi);
-    this.app.hmi.showComponentContext=(data)=>{
-      original(data);
-      if(data?.category==='HMI'){
-        this.open=true;
-        this.openHMIOverlay();
-        document.getElementById('op-hmi')?.classList.add('active');
-      }
-    };
+    // The physical 3D HMI screen is the only HMI operator surface.
+    // Component selection must never open a floating HMI window.
   }
 
   bindPanelState() {
