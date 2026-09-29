@@ -39,6 +39,7 @@ export class CameraController {
 
     this.camera.position.copy(this.defaultCamPos);
     this.controls.target.copy(this.defaultLookAt);
+    this.controls.update();
   }
 
   setViewPreset(presetName) {
