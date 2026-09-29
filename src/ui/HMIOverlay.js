@@ -68,7 +68,6 @@ export class HMIOverlay {
           </select>
 
           <button class="btn-icon" id="btn-reset-cam" title="Reset Camera View (R)">⟲ Reset</button>
-          <button class="btn-icon" id="btn-toggle-left" title="Toggle Recipe Panel">☰ Standard</button>
           <button class="btn-icon" id="btn-sound-toggle" title="Toggle Audio (M)">🔊</button>
         </div>
       </header>
@@ -393,13 +392,9 @@ export class HMIOverlay {
       document.getElementById('sel-cam-preset').value = 'overview';
     });
 
-    // 6. Panel Collapsing
+    // 6. Panel close controls are owned by their own panel.
     document.getElementById('btn-close-left').addEventListener('click', () => {
       document.getElementById('panel-left').classList.add('collapsed');
-    });
-
-    document.getElementById('btn-toggle-left').addEventListener('click', () => {
-      document.getElementById('panel-left').classList.toggle('collapsed');
     });
 
     document.getElementById('btn-close-right').addEventListener('click', () => {
@@ -505,8 +500,6 @@ export class HMIOverlay {
       if (this.selectedComponent) {
         if (this.selectedComponent.type === 'ESTOP') {
           this.simEngine.triggerEStop();
-        } else if (this.selectedComponent.action === 'TOGGLE_DOOR') {
-          this.simEngine.toggleSafetyDoor();
         } else {
           this.simEngine.start();
         }
@@ -636,8 +629,6 @@ export class HMIOverlay {
     const btnAction = document.getElementById('btn-ctx-action');
     if (userData.type === 'ESTOP') {
       btnAction.textContent = 'TRIP / RESET EMERGENCY STOP';
-    } else if (userData.action === 'TOGGLE_DOOR') {
-      btnAction.textContent = 'OPEN / CLOSE SAFETY DOOR';
     } else {
       btnAction.textContent = `OPERATE ${userData.name.toUpperCase().slice(0, 24)}`;
     }
@@ -667,14 +658,6 @@ export class HMIOverlay {
     document.getElementById('lbl-laser-dia').textContent = `${t.laserDiameterMm.toFixed(2)} mm`;
     document.getElementById('lbl-cut-force').textContent = `${t.cuttingForceN.toFixed(1)} N`;
 
-    const doorLbl = document.getElementById('lbl-door-stat');
-    if (this.simEngine.isSafetyDoorOpen) {
-      doorLbl.textContent = 'OPEN (STOPPED)';
-      doorLbl.style.color = 'var(--accent-red)';
-    } else {
-      doorLbl.textContent = 'CLOSED';
-      doorLbl.style.color = 'var(--accent-green)';
-    }
   }
 
   onInspection(insp) {
