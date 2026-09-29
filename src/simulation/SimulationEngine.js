@@ -420,6 +420,11 @@ export class SimulationEngine {
       case 'SEPARATING':
         // Layer separation wedge divides cores; jacket waste drops
         s.cable.setCutState('SEPARATED');
+        // Physically collect the peeled jacket/waste in the reject-scrap cart.
+        // The waste is added only after separation has completed.
+        if (s.outputTrays && typeof s.outputTrays.addWaste === 'function') {
+          s.outputTrays.addWaste('PEELED_JACKET');
+        }
         this.wasteCount++;
 
         // Release clamp
@@ -463,6 +468,10 @@ export class SimulationEngine {
           if (prepProgress > 0.5 && !s.dumbbell.isDumbbellCut) {
             if (this.audio) this.audio.playPunchStamp();
             s.dumbbell.ejectScrapFlash();
+            // Punching creates a real scrap slug which is collected in the reject cart.
+            if (s.outputTrays && typeof s.outputTrays.addWaste === 'function') {
+              s.outputTrays.addWaste('PUNCH_SCRAP');
+            }
             this.wasteCount++;
           }
         }
