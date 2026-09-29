@@ -57,16 +57,6 @@ export class HMIOverlay {
 
         <!-- Camera Presets & Audio -->
         <div class="hmi-top-right">
-          <select class="camera-preset-select" id="sel-cam-preset">
-            <option value="overview" selected>Camera: 3/4 Front Overview</option>
-            <option value="reel">Camera: Cable Reel & Inlet</option>
-            <option value="feed">Camera: Feed & Straightener</option>
-            <option value="cutting">Camera: Cutter & Clamp</option>
-            <option value="punch">Camera: Dumbbell Die Press</option>
-            <option value="trays">Camera: Output Collection Carts</option>
-            <option value="hmi">Camera: Electrical & HMI</option>
-          </select>
-
           <button class="btn-icon" id="btn-reset-cam" title="Reset Camera View (R)">⟲ Reset</button>
           <button class="btn-icon" id="btn-sound-toggle" title="Toggle Audio (M)">🔊</button>
         </div>
@@ -329,10 +319,6 @@ export class HMIOverlay {
               <span class="telem-lbl">Force:</span>
               <span class="telem-val" id="lbl-cut-force">0.0 N</span>
             </div>
-            <div class="telem-pill">
-              <span class="telem-lbl">Safety Door:</span>
-              <span class="telem-val" id="lbl-door-stat" style="color: var(--accent-green);">CLOSED</span>
-            </div>
           </div>
         </div>
       </footer>
@@ -382,14 +368,9 @@ export class HMIOverlay {
       this.simEngine.assemble();
     });
 
-    // 5. Camera Presets (Manual button/dropdown selection)
-    document.getElementById('sel-cam-preset').addEventListener('change', (e) => {
-      this.camCtrl.setViewPreset(e.target.value);
-    });
-
+    // 5. Camera controls: only manual reset is exposed; no automatic camera presets.
     document.getElementById('btn-reset-cam').addEventListener('click', () => {
       this.camCtrl.resetView();
-      document.getElementById('sel-cam-preset').value = 'overview';
     });
 
     // 6. Panel close controls are owned by their own panel.
