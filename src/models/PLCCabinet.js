@@ -247,19 +247,35 @@ export class PLCCabinet {
     consoleMesh.castShadow = true;
     this.hmiArmGroup.add(consoleMesh);
 
-    // HMI Display Screen Glass
+    // Live operative touchscreen rendered directly on the physical 3D HMI.
     const screenGeo = new THREE.PlaneGeometry(0.32, 0.20);
-    const screen = new THREE.Mesh(screenGeo, this.matHMIGlass);
+    const hmiCanvas = document.createElement('canvas');
+    hmiCanvas.width = 640;
+    hmiCanvas.height = 400;
+    const hmiTexture = new THREE.CanvasTexture(hmiCanvas);
+    hmiTexture.colorSpace = THREE.SRGBColorSpace;
+    hmiTexture.minFilter = THREE.LinearFilter;
+    hmiTexture.magFilter = THREE.LinearFilter;
+    const hmiScreenMaterial = new THREE.MeshBasicMaterial({ map:hmiTexture, toneMapped:false });
+    const screen = new THREE.Mesh(screenGeo, hmiScreenMaterial);
     screen.position.set(0.28, 0.24, 0.242);
     screen.rotation.y = -0.35;
     screen.rotation.x = -0.15;
+    screen.userData.hmiCanvas = hmiCanvas;
+    screen.userData.hmiTexture = hmiTexture;
+    screen.userData.hmiWidth = 640;
+    screen.userData.hmiHeight = 400;
+    screen.userData.hmiTouchSurface = true;
+    this.hmiScreen = screen;
+    this.hmiCanvas = hmiCanvas;
+    this.hmiTexture = hmiTexture;
     this.hmiArmGroup.add(screen);
 
     const hmiData = {
       name: 'Industrial HMI Touchscreen Operator Console',
       category: 'HMI',
       action: 'OPEN_HMI',
-      description: 'Operative capacitive touch HMI. Tap the screen to open the live operator interface; its controls command the 3D digital twin.'
+      description: 'Operative capacitive touch HMI. Touch the controls directly on the physical 3D display to command the digital twin.'
     };
     consoleMesh.userData = hmiData;
     screen.userData = hmiData;
