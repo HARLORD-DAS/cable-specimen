@@ -274,7 +274,10 @@ class DigitalTwinApp {
           }
 
           // CAMERA REMAINS FIRMLY FIXED
-          // Open contextual panel
+          // Component inspection always belongs to the RIGHT contextual panel.
+          if (this.operativeHMI && this.hmi && hit.userData.action !== 'OPEN_HMI') {
+            this.operativeHMI.openPanel('right');
+          }
         } else {
           this.hmi.showComponentContext(null);
         }
