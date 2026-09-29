@@ -290,45 +290,46 @@ export class SimulationEngine {
         }
         break;
 
-      case 'FEEDING':
-      case 'STRAIGHTENING':
-        // Dynamic Feeding: Rollers rotate, Reel unspools, and Cable physically advances
+      case 'FEEDING': {
+        // Feed first: reel -> payout guide -> inlet -> feed rollers.
         const feedDuration = p.feedDistanceMm / p.feedSpeedMmPerSec;
         const feedProgress = Math.min(1.0, this.stateTimer / Math.max(0.4, feedDuration));
-
-        // Advance displacement
         const currentMm = p.feedDistanceMm * feedProgress;
         const deltaMm = p.feedSpeedMmPerSec * delta;
+
         this.feedDisplacementM = currentMm * 0.001;
-
-        // Move cable
         s.cable.setFeedDisplacement(this.feedDisplacementM);
-        s.cable.setStraightness(feedProgress);
+        s.cable.setStraightness(0.0);
 
-        // Unspool cable reel proportionally to feed movement
         if (s.reel) {
           s.reel.rotate(deltaMm * 0.001);
           this.liveTelemetry.reelRemainingMeters = s.reel.remainingCableMeters;
         }
-
-        // Rotate motorized feed rollers & straighteners
         s.feedStraightener.update(delta, true, p.feedSpeedMmPerSec);
         s.inlet.update(delta, true);
 
-        // Encoder tracking
         this.liveTelemetry.encoderDistanceMm = currentMm;
         this.liveTelemetry.encoderPulses = s.feedStraightener.encoderPulses;
         this.liveTelemetry.feedSpeedMmPerSec = p.feedSpeedMmPerSec;
 
-        if (this.stateTimer > 0.3 && this.state === 'FEEDING') {
-          this.state = 'STRAIGHTENING';
-        }
-
         if (feedProgress >= 1.0) {
+          s.feedStraightener.update(0, false);
+          this.transitionTo('STRAIGHTENING');
+        }
+        break;
+      }
+
+      case 'STRAIGHTENING': {
+        // Feed stops; the straightener completes its mechanical settling before measurement.
+        const straightProgress = Math.min(1.0, this.stateTimer / 0.8);
+        s.feedStraightener.update(delta, true, Math.max(1, p.feedSpeedMmPerSec * (1 - straightProgress)));
+        s.cable.setStraightness(straightProgress);
+        if (straightProgress >= 1.0) {
           s.feedStraightener.update(0, false);
           this.transitionTo('MEASUREMENT');
         }
         break;
+      }
 
       case 'MEASUREMENT':
         // Optical laser micrometer measures outer profile
