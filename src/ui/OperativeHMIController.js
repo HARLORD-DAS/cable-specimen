@@ -35,6 +35,16 @@ export class OperativeHMIController {
       #op-info{left:14px;top:50%;transform:translateY(-50%)}
       #op-controls{right:14px;top:50%;transform:translateY(-50%)}
       #op-hmi{right:14px;top:14px}
+      #op-hmi-panel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100vw - 28px));max-height:calc(100vh - 28px);overflow:auto;background:#151719;color:#e8eaec;border:1px solid #555a5e;border-radius:12px;box-shadow:0 24px 80px #000b;z-index:12500}
+      #op-hmi-panel[hidden]{display:none!important}
+      .op-hmi-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #3d4145;font-weight:800}
+      .op-hmi-close{width:34px;height:34px;border:1px solid #555a5e;border-radius:8px;background:#202427;color:#fff;font-size:20px;cursor:pointer}
+      .op-hmi-body{padding:14px;display:grid;gap:12px}
+      .op-hmi-status{display:flex;justify-content:space-between;padding:10px;background:#202427;border-radius:8px}
+      .op-hmi-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+      .op-hmi-action{min-height:48px;border:1px solid #555a5e;border-radius:8px;background:#24282b;color:#fff;font-weight:800;cursor:pointer}
+      .op-hmi-action:hover{border-color:#f2a900;color:#f2a900}
+      .op-hmi-action.start{background:#1c6841}.op-hmi-action.stop{background:#70272b}.op-hmi-action.estop{background:#8d2025}
       #op-info:hover,#op-controls:hover{transform:translateY(-50%) scale(1.04)}
 
       #hmi-root.hmi-hmi-open #panel-hmi{display:block!important}
@@ -62,6 +72,7 @@ export class OperativeHMIController {
         #op-info{left:8px;top:auto;bottom:154px;transform:none}
         #op-controls{right:8px;top:auto;bottom:154px;transform:none}
         #op-hmi{right:8px;top:8px}
+        #op-hmi-panel{top:8px;transform:translateX(-50%);max-height:calc(100vh - 16px)}
         #op-info:hover,#op-controls:hover{transform:scale(1.04)}
         #hmi-root.hmi-panel-open #panel-left,
         #hmi-root.hmi-panel-open #panel-right{
@@ -90,6 +101,19 @@ export class OperativeHMIController {
       <button class="op-hmi-icon" id="op-info" title="Open left instructions">☰</button>
       <button class="op-hmi-icon" id="op-controls" title="Open right controls">☷</button>
       <button class="op-hmi-icon" id="op-hmi" title="Open physical HMI operator screen">▣</button>
+      <section id="op-hmi-panel" hidden aria-label="Operative HMI">
+        <div class="op-hmi-head"><span>HMI MACHINE CONTROL</span><button class="op-hmi-close" id="op-hmi-close" title="Close HMI">×</button></div>
+        <div class="op-hmi-body">
+          <div class="op-hmi-status"><span>STATUS</span><strong id="op-hmi-state">READY</strong></div>
+          <div class="op-hmi-actions">
+            <button class="op-hmi-action start" id="op-hmi-start">START</button>
+            <button class="op-hmi-action stop" id="op-hmi-stop">STOP / PAUSE</button>
+            <button class="op-hmi-action" id="op-hmi-reset">RESET</button>
+            <button class="op-hmi-action estop" id="op-hmi-estop">E-STOP</button>
+          </div>
+          <div class="op-hmi-status"><span>MODE</span><strong id="op-hmi-mode">AUTO</strong></div>
+        </div>
+      </section>
     `;
     document.body.appendChild(dock);
 
@@ -110,6 +134,9 @@ export class OperativeHMIController {
     const right=document.getElementById('panel-right');
     if(left) left.style.display = side === 'left' ? 'block' : 'none';
     if(right) right.style.display = side === 'right' ? 'block' : 'none';
+    const hmiPanel=document.getElementById('op-hmi-panel');
+    if(hmiPanel) hmiPanel.hidden=true;
+    root.classList.remove('hmi-hmi-open');
 
     document.getElementById('op-info')?.classList.toggle('active', side === 'left');
     document.getElementById('op-controls')?.classList.toggle('active', side === 'right');
@@ -117,29 +144,50 @@ export class OperativeHMIController {
 
   openHMIOverlay() {
     const root=document.getElementById('hmi-root');
-    if(!root) return;
-    root.classList.remove('hmi-collapsed');
-    root.classList.add('hmi-hmi-open');
+    if(root){ root.classList.remove('hmi-collapsed','hmi-panel-open'); root.classList.add('hmi-hmi-open'); }
     const left=document.getElementById('panel-left');
     const right=document.getElementById('panel-right');
     if(left) left.style.display='none';
     if(right) right.style.display='none';
     const hmi=document.getElementById('panel-hmi');
-    if(hmi) hmi.style.display='block';
+    if(hmi) hmi.style.display='none';
+    const panel=document.getElementById('op-hmi-panel');
+    if(panel) panel.hidden=false;
     document.getElementById('op-info')?.classList.remove('active');
     document.getElementById('op-controls')?.classList.remove('active');
   }
 
   closeHMI() {
     const root=document.getElementById('hmi-root');
-    if(!root) return;
-    root.classList.add('hmi-collapsed');
+    if(root) root.classList.add('hmi-collapsed');
     root.classList.remove('hmi-hmi-open');
     root.classList.remove('hmi-hmi-open');
     const hmi=document.getElementById('panel-hmi');
     if(hmi) hmi.style.display='';
+    const panel=document.getElementById('op-hmi-panel');
+    if(panel) panel.hidden=true;
     this.open=false;
     document.getElementById('op-hmi')?.classList.remove('active');
+  }
+
+  closeSidePanel(side) {
+    const root=document.getElementById('hmi-root');
+    const panelId=side==='left'?'panel-left':'panel-right';
+    const iconId=side==='left'?'op-info':'op-controls';
+    document.getElementById(panelId)?.style.setProperty('display','none');
+    document.getElementById(iconId)?.classList.remove('active');
+    const other=side==='left'?'panel-right':'panel-left';
+    if(root) root.classList.remove('hmi-panel-open');
+    // Keep the other panel closed/open state untouched; its icon controls it independently.
+    if(document.getElementById(other)?.style.display==='block' && root) root.classList.add('hmi-panel-open');
+  }
+
+  updateHMIState(){
+    const sim=this.app.sim;
+    const state=document.getElementById('op-hmi-state');
+    const mode=document.getElementById('op-hmi-mode');
+    if(state) state.textContent=sim?.isEStopped?'E-STOP':(sim?.isPaused?'PAUSED':(sim?.state||'READY'));
+    if(mode) mode.textContent=sim?.recipeManager?.mode||'AUTO';
   }
 
   closePanels() {
@@ -162,9 +210,11 @@ export class OperativeHMIController {
   toggleHMI() {
     this.open=!this.open;
     const button=document.getElementById('op-hmi');
+    const panel=document.getElementById('op-hmi-panel');
 
     if(this.open) {
-      this.openPanel('right');
+      this.openHMIOverlay();
+      if(panel) panel.hidden=false;
       this.hmi.showComponentContext({
         name:'Industrial HMI Touchscreen Operator Console',
         category:'HMI',
@@ -173,7 +223,7 @@ export class OperativeHMIController {
       });
       button?.classList.add('active');
     } else {
-      this.closePanels();
+      this.closeHMI();
       button?.classList.remove('active');
     }
   }
@@ -195,8 +245,12 @@ export class OperativeHMIController {
     document.getElementById('op-hmi-stop')?.addEventListener('click',()=>this.app.simEngine?.pause?.());
     document.getElementById('op-hmi-reset')?.addEventListener('click',()=>this.app.simEngine?.reset());
     document.getElementById('op-hmi-estop')?.addEventListener('click',()=>this.app.simEngine?.triggerEStop());
-    document.getElementById('btn-close-left')?.addEventListener('click',()=>this.closePanels());
-    document.getElementById('btn-close-right')?.addEventListener('click',()=>this.closePanels());
-    document.getElementById('btn-close-hmi')?.addEventListener('click',()=>this.closeHMI());
+    document.getElementById('btn-close-left')?.addEventListener('click',()=>this.closeSidePanel('left'));
+    document.getElementById('btn-close-right')?.addEventListener('click',()=>this.closeSidePanel('right'));
+    document.getElementById('op-hmi-close')?.addEventListener('click',()=>this.closeHMI());
+    document.getElementById('op-hmi-start')?.addEventListener('click',()=>{ this.app.sim.start(); this.updateHMIState(); });
+    document.getElementById('op-hmi-stop')?.addEventListener('click',()=>{ this.app.sim.pause(); this.updateHMIState(); });
+    document.getElementById('op-hmi-reset')?.addEventListener('click',()=>{ this.app.sim.reset(); this.updateHMIState(); });
+    document.getElementById('op-hmi-estop')?.addEventListener('click',()=>{ this.app.sim.triggerEStop(); this.updateHMIState(); });
   }
 }
