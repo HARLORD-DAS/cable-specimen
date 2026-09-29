@@ -91,21 +91,16 @@ export class OperativeHMIController {
   }
 
   openPanel(side) {
-    const root=document.getElementById('hmi-root');
-    if(!root) return;
-    root.classList.remove('hmi-collapsed');
-    root.classList.add('hmi-panel-open');
+    const left = document.getElementById('panel-left');
+    const right = document.getElementById('panel-right');
 
-    const left=document.getElementById('panel-left');
-    const right=document.getElementById('panel-right');
-    if(left) left.style.display = side === 'left' ? 'block' : 'none';
-    if(right) right.style.display = side === 'right' ? 'block' : 'none';
-    const hmiPanel=document.getElementById('op-hmi-panel');
-    if(hmiPanel) hmiPanel.hidden=true;
-    root.classList.remove('hmi-hmi-open');
-
-    document.getElementById('op-info')?.classList.toggle('active', side === 'left');
-    document.getElementById('op-controls')?.classList.toggle('active', side === 'right');
+    // Left icon ALWAYS opens only the LEFT panel.
+    // Right icon ALWAYS opens only the RIGHT panel.
+    if (side === 'left') {
+      left?.classList.remove('collapsed');
+    } else if (side === 'right') {
+      right?.classList.remove('collapsed');
+    }
   }
 
   closeSidePanel(side) {
