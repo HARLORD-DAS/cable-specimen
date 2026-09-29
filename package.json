@@ -1,0 +1,17 @@
+{
+  "name": "cable-specimen-digital-twin",
+  "version": "1.0.0",
+  "description": "Universal Automated Cable Specimen Preparation and Routing System - 3D Realistic Engineering Digital Twin",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host --port 3000",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}
