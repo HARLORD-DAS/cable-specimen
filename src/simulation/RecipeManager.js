@@ -123,12 +123,12 @@ export class RecipeManager {
         peelDistanceMm: 0.0,
         punchStrokeMm: 0.0,
         cuttingSpeedRpm: 800,
-        specimenType: 'WAFER',
+        specimenType: 'SHEET',
         specimenLengthMm: 1.0, // 1mm thick cross section wafer
         specimenWidthMm: dia,
         specimenThicknessMm: isPower ? 1.8 : 1.2,
         numberOfSpecimens: 5,
-        routingPath: 'VISION_STAGE',
+        routingPath: 'SHEET_TRAY',
         inspectionToleranceMm: 0.04
       };
     } else {
