@@ -9,6 +9,10 @@ export class OperativeHMIController {
     this.app = app;
     this.hmi = app.hmi;
     this.open = false;
+    this.lastScreenState = '';
+    this.screen = app.plcCabinet?.hmiScreen || null;
+    this.screenCanvas = app.plcCabinet?.hmiCanvas || null;
+    this.screenTexture = app.plcCabinet?.hmiTexture || null;
     this.injectStyle();
     this.buildDock();
     this.bindPhysicalHMI();
@@ -230,6 +234,47 @@ export class OperativeHMIController {
     }
   }
 
+  drawPhysicalScreen() {
+    if(!this.screenCanvas || !this.screenTexture) return;
+    const ctx=this.screenCanvas.getContext('2d');
+    ctx.fillStyle='#111315'; ctx.fillRect(0,0,640,400);
+    ctx.fillStyle='#202427'; ctx.fillRect(0,0,640,62);
+    ctx.fillStyle='#f2a900'; ctx.fillRect(0,58,640,4);
+    ctx.font='700 25px Arial'; ctx.fillStyle='#f4f5f6'; ctx.fillText('CABLE SPECIMEN SYSTEM',22,38);
+    const sim=this.app.sim;
+    const state=sim?.isEStopped?'E-STOP':(sim?.isPaused?'PAUSED':(sim?.state||'READY'));
+    const mode=sim?.recipeManager?.mode||'AUTO';
+    ctx.font='700 18px Arial'; ctx.fillStyle=sim?.isEStopped?'#e5484d':'#35b86b'; ctx.fillText(state,24,94);
+    ctx.font='600 15px Arial'; ctx.fillStyle='#b9bec2'; ctx.fillText('MODE',24,120); ctx.fillStyle='#f4f5f6'; ctx.fillText(mode,82,120);
+    const buttons=[{x:20,w:140,label:'START',fill:'#1d6b43'},{x:170,w:140,label:'STOP',fill:'#6f2528'},{x:320,w:140,label:'RESET',fill:'#30353a'},{x:470,w:150,label:'E-STOP',fill:'#8f2024'}];
+    buttons.forEach(b=>{ctx.fillStyle=b.fill;ctx.fillRect(b.x,145,b.w,72);ctx.strokeStyle='#697077';ctx.lineWidth=2;ctx.strokeRect(b.x,145,b.w,72);ctx.fillStyle='#fff';ctx.font='800 18px Arial';ctx.textAlign='center';ctx.fillText(b.label,b.x+b.w/2,188);});
+    ctx.textAlign='left'; ctx.fillStyle='#202427';ctx.fillRect(20,238,600,140);ctx.fillStyle='#9fa6ab';ctx.font='600 14px Arial';ctx.fillText('LIVE OPERATOR SCREEN',34,265);ctx.fillStyle='#e8eaec';ctx.font='600 16px Arial';ctx.fillText('Touch the controls directly on the machine HMI.',34,296);ctx.fillText('The 3D machine responds to each command.',34,324);ctx.fillStyle='#f2a900';ctx.font='700 14px Arial';ctx.fillText('CONCEPT SIMULATION / DIGITAL TWIN',34,356);
+    this.screenTexture.needsUpdate=true;
+  }
+
+  handlePhysicalTouch(uv) {
+    if(!uv) return true;
+    const x=uv.x*640, y=(1-uv.y)*400;
+    if(y>=145 && y<=217){
+      if(x>=20&&x<=160) this.app.sim.start();
+      else if(x>=170&&x<=310) this.app.sim.pause();
+      else if(x>=320&&x<=460) this.app.sim.reset();
+      else if(x>=470&&x<=620) this.app.sim.triggerEStop();
+      this.lastScreenState='';
+      this.drawPhysicalScreen();
+    }
+    return true;
+  }
+
+  update() {
+    if(!this.screenCanvas || !this.screenTexture) return;
+    const sim=this.app.sim;
+    const state=sim?.isEStopped?'E-STOP':(sim?.isPaused?'PAUSED':(sim?.state||'READY'));
+    const mode=sim?.recipeManager?.mode||'AUTO';
+    const sig=state+'|'+mode;
+    if(sig!==this.lastScreenState){this.lastScreenState=sig;this.drawPhysicalScreen();}
+  }
+
   bindPhysicalHMI() {
     const original=this.app.hmi.showComponentContext.bind(this.app.hmi);
     this.app.hmi.showComponentContext=(data)=>{
@@ -243,15 +288,7 @@ export class OperativeHMIController {
   }
 
   bindPanelState() {
-    document.getElementById('op-hmi-start')?.addEventListener('click',()=>this.app.simEngine?.start());
-    document.getElementById('op-hmi-stop')?.addEventListener('click',()=>this.app.simEngine?.pause?.());
-    document.getElementById('op-hmi-reset')?.addEventListener('click',()=>this.app.simEngine?.reset());
     document.getElementById('btn-close-left')?.addEventListener('click',()=>this.closeSidePanel('left'));
     document.getElementById('btn-close-right')?.addEventListener('click',()=>this.closeSidePanel('right'));
-    document.getElementById('op-hmi-close')?.addEventListener('click',()=>this.closeHMI());
-    document.getElementById('op-hmi-start')?.addEventListener('click',()=>{ this.app.sim.start(); this.updateHMIState(); });
-    document.getElementById('op-hmi-stop')?.addEventListener('click',()=>{ this.app.sim.pause(); this.updateHMIState(); });
-    document.getElementById('op-hmi-reset')?.addEventListener('click',()=>{ this.app.sim.reset(); this.updateHMIState(); });
-    document.getElementById('op-hmi-estop')?.addEventListener('click',()=>{ this.app.sim.triggerEStop(); this.updateHMIState(); });
   }
 }
