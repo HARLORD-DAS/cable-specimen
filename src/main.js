@@ -266,9 +266,15 @@ class DigitalTwinApp {
           this.highlightRing.position.set(worldPos.x, 0.005, worldPos.z);
           this.highlightRing.visible = true;
 
+          // Physical HMI is a true operator entry point. Do not treat it as
+          // an ordinary component-selection event.
+          if (hit.userData.action === 'OPEN_HMI' && this.operativeHMI) {
+            this.operativeHMI.toggleHMI();
+            return;
+          }
+
           // CAMERA REMAINS FIRMLY FIXED
           // Open contextual panel
-          this.hmi.showComponentContext(hit.userData);
         } else {
           this.hmi.showComponentContext(null);
         }
