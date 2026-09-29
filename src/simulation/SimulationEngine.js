@@ -37,6 +37,7 @@ export class SimulationEngine {
     this.passCount = 0;
     this.rejectCount = 0;
     this.wasteCount = 0;
+    this.wasteDispatched = false;
 
     // Physical kinematics parameters
     this.feedDisplacementM = 0.0;
@@ -117,6 +118,7 @@ export class SimulationEngine {
     this.feedDisplacementM = 0.0;
     this.stateTimer = 0.0;
     this.cycleTimeSec = 0.0;
+    this.wasteDispatched = false;
 
     if (this.subsystems) {
       const {
@@ -421,6 +423,12 @@ export class SimulationEngine {
       case 'SEPARATING':
         // Layer separation wedge divides cores; jacket waste drops
         s.cable.setCutState('SEPARATED');
+        // Dispatch peeled-jacket waste once; the cart receives it only after transport.
+        if (this.wasteDispatched) {
+          if (this.stateTimer > 0.6) this.transitionTo('ROUTING');
+          break;
+        }
+        this.wasteDispatched = true;
         // Physically collect the peeled jacket/waste in the reject-scrap cart.
         // The waste is added only after separation has completed.
         if (s.outputTrays && typeof s.outputTrays.addWaste === 'function') {
