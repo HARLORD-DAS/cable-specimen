@@ -4,9 +4,11 @@
   "description": "Universal Automated Cable Specimen Preparation and Routing System - 3D Realistic Engineering Digital Twin",
   "type": "module",
   "scripts": {
-    "dev": "vite --host --port 3000",
+    "dev": "vite --host 0.0.0.0 --port 3000",
+    "dev:local": "vite --host 127.0.0.1 --port 3000",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview --host 0.0.0.0 --port 4173",
+    "preview:local": "vite preview --host 127.0.0.1 --port 4173"
   },
   "dependencies": {
     "three": "^0.170.0"
