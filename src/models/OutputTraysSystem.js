@@ -115,20 +115,53 @@ export class OutputTraysSystem {
   }
 
   buildWasteChutes() {
-    // Fixed receiving chutes: processing waste visibly travels toward the Reject/Scrap cart.
-    const chuteMat = new THREE.MeshStandardMaterial({ color: 0x555a5e, roughness: 0.42, metalness: 0.72 });
-    const makeChute = (x, y, z, length, angle = 0) => {
-      const chute = new THREE.Mesh(new THREE.BoxGeometry(length, 0.055, 0.18), chuteMat);
-      chute.position.set(x, y, z);
-      chute.rotation.z = angle;
+    // Physical waste-transfer path from the processing area into the reject/scrap cart.
+    // The carts are mounted on the front apron, so the chute is kept in the same
+    // local coordinate system as the carts and remains visibly connected to them.
+    const chuteMat = new THREE.MeshStandardMaterial({
+      color: 0x555a5e,
+      roughness: 0.38,
+      metalness: 0.76
+    });
+
+    const addChuteSegment = (a, b, width = 0.16) => {
+      const start = new THREE.Vector3(...a);
+      const end = new THREE.Vector3(...b);
+      const mid = start.clone().add(end).multiplyScalar(0.5);
+      const length = start.distanceTo(end);
+      const chute = new THREE.Mesh(
+        new THREE.BoxGeometry(length, 0.055, width),
+        chuteMat
+      );
+      chute.position.copy(mid);
+      chute.lookAt(end);
+      chute.rotateY(Math.PI / 2);
       chute.castShadow = true;
       chute.receiveShadow = true;
       this.group.add(chute);
     };
-    makeChute(0.62, 0.16, 0.08, 1.55, -0.05);
-    makeChute(1.02, 0.11, 0.08, 0.55, -0.10);
-  }
 
+    // Two-stage receiving chute: upper processing outlet -> lower reject bin.
+    addChuteSegment([-0.10, 0.40, -0.70], [0.55, 0.30, -0.28], 0.18);
+    addChuteSegment([0.55, 0.30, -0.28], [1.35, 0.19, 0.04], 0.18);
+
+    // Side walls keep small scrap pieces on the chute.
+    const railMat = new THREE.MeshStandardMaterial({
+      color: 0x8e8e8a,
+      roughness: 0.42,
+      metalness: 0.68
+    });
+    [
+      { x: 0.38, y: 0.34, z: -0.43, r: -0.42 },
+      { x: 0.96, y: 0.25, z: -0.11, r: -0.24 }
+    ].forEach(({ x, y, z, r }) => {
+      const rail = new THREE.Mesh(new THREE.BoxGeometry(0.82, 0.025, 0.025), railMat);
+      rail.position.set(x, y, z);
+      rail.rotation.z = r;
+      rail.castShadow = true;
+      this.group.add(rail);
+    });
+  }
   buildFourCarts() {
     // 4 Cart configurations matching Reference Image 1 exactly:
     const cartConfigs = [
