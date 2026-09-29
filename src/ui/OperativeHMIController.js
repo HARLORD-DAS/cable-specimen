@@ -35,7 +35,7 @@ export class OperativeHMIController {
       #op-info{left:14px;top:50%;transform:translateY(-50%)}
       #op-controls{right:14px;top:50%;transform:translateY(-50%)}
       #op-hmi{right:14px;top:14px}
-      #op-hmi-panel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100vw - 28px));max-height:calc(100vh - 28px);overflow:auto;background:#151719;color:#e8eaec;border:1px solid #555a5e;border-radius:12px;box-shadow:0 24px 80px #000b;z-index:12500}
+      #op-hmi-panel{pointer-events:auto;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100vw - 28px));max-height:calc(100vh - 28px);overflow:auto;background:#151719;color:#e8eaec;border:1px solid #555a5e;border-radius:12px;box-shadow:0 24px 80px #000b;z-index:12500}
       #op-hmi-panel[hidden]{display:none!important}
       .op-hmi-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #3d4145;font-weight:800}
       .op-hmi-close{width:34px;height:34px;border:1px solid #555a5e;border-radius:8px;background:#202427;color:#fff;font-size:20px;cursor:pointer}
@@ -159,8 +159,10 @@ export class OperativeHMIController {
 
   closeHMI() {
     const root=document.getElementById('hmi-root');
-    if(root) root.classList.add('hmi-collapsed');
-    root.classList.remove('hmi-hmi-open');
+    if(root) {
+      root.classList.add('hmi-collapsed');
+      root.classList.remove('hmi-hmi-open','hmi-panel-open');
+    }
     root.classList.remove('hmi-hmi-open');
     const hmi=document.getElementById('panel-hmi');
     if(hmi) hmi.style.display='';
@@ -244,7 +246,6 @@ export class OperativeHMIController {
     document.getElementById('op-hmi-start')?.addEventListener('click',()=>this.app.simEngine?.start());
     document.getElementById('op-hmi-stop')?.addEventListener('click',()=>this.app.simEngine?.pause?.());
     document.getElementById('op-hmi-reset')?.addEventListener('click',()=>this.app.simEngine?.reset());
-    document.getElementById('op-hmi-estop')?.addEventListener('click',()=>this.app.simEngine?.triggerEStop());
     document.getElementById('btn-close-left')?.addEventListener('click',()=>this.closeSidePanel('left'));
     document.getElementById('btn-close-right')?.addEventListener('click',()=>this.closeSidePanel('right'));
     document.getElementById('op-hmi-close')?.addEventListener('click',()=>this.closeHMI());
