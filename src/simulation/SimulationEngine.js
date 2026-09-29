@@ -23,7 +23,6 @@ export class SimulationEngine {
     this.previousState = 'IDLE';
     this.isPaused = false;
     this.isEStopped = false;
-    this.isSafetyDoorOpen = false;
 
     // Exploded View Animation State
     this.explodedProgress = 0.0; // 0.0 = Assembled, 1.0 = Fully Exploded
@@ -89,7 +88,7 @@ export class SimulationEngine {
   }
 
   start() {
-    if (this.isEStopped || this.isSafetyDoorOpen) return;
+    if (this.isEStopped) return;
     if (this.state === 'IDLE' || this.state === 'COMPLETE') {
       this.transitionTo('CABLE_DETECTED');
       this.cycleTimeSec = 0.0;
@@ -176,27 +175,6 @@ export class SimulationEngine {
     }
   }
 
-  toggleSafetyDoor() {
-    if (!this.subsystems || !this.subsystems.enclosure) return;
-    this.isSafetyDoorOpen = this.subsystems.enclosure.toggleDoor();
-
-    if (this.isSafetyDoorOpen) {
-      if (this.state !== 'IDLE' && this.state !== 'COMPLETE') {
-        this.transitionTo('SAFETY_STOP');
-        if (this.audio) this.audio.playSafetyAlarm();
-        if (this.subsystems && this.subsystems.frame) {
-          this.subsystems.frame.setSignalState('SAFETY_STOP');
-        }
-      }
-    } else {
-      if (this.state === 'SAFETY_STOP') {
-        this.transitionTo(this.previousState);
-        if (this.subsystems && this.subsystems.frame) {
-          this.subsystems.frame.setSignalState('RUNNING');
-        }
-      }
-    }
-  }
 
   transitionTo(newState) {
     this.previousState = this.state;
