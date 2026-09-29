@@ -44,22 +44,22 @@ export class EnclosureSystem {
       name: 'PolycarbEngineeringView'
     });
 
-    // 3. Aluminium Sash Frame for Door Panels
+    // 3. Aluminium Sash Frame
     this.matDoorFrame = new THREE.MeshStandardMaterial({
       color: 0x8e8e8a,
       roughness: 0.3,
       metalness: 0.75,
-      name: 'DoorAluFrame'
+      name: 'GuardAluFrame'
     });
 
-    // 4. Door Handles
+    // 4. Reserved guard hardware
     this.matHandle = new THREE.MeshStandardMaterial({
       color: 0x0284c7,
       roughness: 0.3,
       metalness: 0.5
     });
 
-    // 5. Interlock Safety Switch Housing
+    // 5. Safety Switch Housing
     this.matInterlockHousing = new THREE.MeshStandardMaterial({
       color: 0xdc2626, // Red safety switch body
       roughness: 0.4,
@@ -101,7 +101,7 @@ export class EnclosureSystem {
   }
 
   buildSafetyInterlock() {
-    // Interlock Switch mounted between door frame and pillar
+    // Fixed safety switch housing on the enclosure frame
     this.interlockGroup = new THREE.Group();
     this.interlockGroup.name = 'SafetyInterlockSwitch';
     this.interlockGroup.position.set(0.0, 1.62, 0.66);
